@@ -13,9 +13,6 @@ import countBits from '../function/countBits'
 import encodeOid from '../function/encodeOid'
 import getChoice from '../function/getChoice'
 import encodeReal from '../function/encodeReal'
-import i64Toi32 from '../function/i64Toi32'
-
-const supportBigInt = typeof BigInt === 'function'
 
 export default class DerEncoder {
 

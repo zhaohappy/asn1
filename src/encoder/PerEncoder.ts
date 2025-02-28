@@ -13,7 +13,6 @@ import encodeOid from '../function/encodeOid'
 import getChoice from '../function/getChoice'
 import getSequenceMarker from '../function/getSequenceMarker'
 import encodeReal from '../function/encodeReal'
-import i64Toi32 from '../function/i64Toi32'
 
 export default class PerEncoder {
 
