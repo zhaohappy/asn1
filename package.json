@@ -1,0 +1,43 @@
+{
+  "name": "asn1",
+  "version": "0.0.1",
+  "description": "asn encoder and decoder",
+  "main": "index.js",
+  "scripts": {
+    "build": "rollup -c",
+    "eslint-fix": "./node_modules/.bin/eslint './src/**/*.ts' -c=./eslint/typescript.js --rulesdir=./eslint/rules --ignore-path=./.eslintignore --fix",
+    "eslint-check": "./node_modules/.bin/eslint './src/**/*.ts' -c=./eslint/typescript.js --rulesdir=./eslint/rules --ignore-path=./.eslintignore"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhaohappy/asn1.git"
+  },
+  "keywords": [
+    "asn",
+    "decoder",
+    "encoder"
+  ],
+  "author": "Gaoxing Zhao",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zhaohappy/asn/issues"
+  },
+  "homepage": "https://github.com/zhaohappy/asn#readme",
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "@rollup/plugin-typescript": "^12.1.1",
+    "@types/jest": "^23.3.14",
+    "@types/node": "^22.10.1",
+    "@typescript-eslint/eslint-plugin": "^6.3.0",
+    "@typescript-eslint/parser": "^6.3.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.46.0",
+    "jest": "^23.6.0",
+    "rollup": "^4.27.4",
+    "rollup-plugin-sourcemaps": "^0.6.3",
+    "ts-jest": "^23.10.5",
+    "tslib": "^2.8.1",
+    "typescript": "^5.7.2",
+    "yargs": "^13.3.0"
+  }
+}
