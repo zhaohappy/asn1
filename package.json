@@ -1,7 +1,7 @@
 {
   "name": "asn1",
   "version": "0.0.1",
-  "description": "asn encoder and decoder",
+  "description": "asn1 encoder and decoder",
   "main": "index.js",
   "scripts": {
     "build": "rollup -c",
@@ -12,6 +12,8 @@
     "type": "git",
     "url": "git+https://github.com/zhaohappy/asn1.git"
   },
+  "module": "./dist/asn1.js",
+  "types": "./dist/index.d.ts",
   "keywords": [
     "asn",
     "decoder",
@@ -20,9 +22,9 @@
   "author": "Gaoxing Zhao",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/zhaohappy/asn/issues"
+    "url": "https://github.com/zhaohappy/asn1/issues"
   },
-  "homepage": "https://github.com/zhaohappy/asn#readme",
+  "homepage": "https://github.com/zhaohappy/asn1#readme",
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "@rollup/plugin-typescript": "^12.1.1",
