@@ -10,7 +10,7 @@ asn1 是一个 asn1 语法编解码实现，支持 ber、der、per。
 
 ```typescript
 
-import { defined } from '../src/index'
+import { defined } from 'asn1'
 
 const Syntax = defined.Sequence({
   a: defined.Boolean(),
@@ -58,7 +58,7 @@ const Syntax = defined.Sequence({
 
 ```typescript
 
-import { BerEncoder } from '../src/index'
+import { BerEncoder } from 'asn1'
 
 const encoder = new BerEncoder()
 
@@ -104,7 +104,7 @@ const buffer = encoder.encode(data, Syntax)
 
 ```typescript
 
-import { BerDecoder } from '../src/index'
+import { BerDecoder } from 'asn1'
 
 const decoder = new BerDecoder()
 
