@@ -4,6 +4,8 @@ import BerDecoder from './decoder/BerDecoder'
 import BerEncoder from './encoder/BerEncoder'
 import DerDecoder from './decoder/DerDecoder'
 import DerEncoder from './encoder/DerEncoder'
+import parse from './tools/parser'
+import stringify from './tools/stringify'
 
 export * as defined from './asn/defined'
 
@@ -13,5 +15,7 @@ export {
   BerDecoder,
   BerEncoder,
   DerDecoder,
-  DerEncoder
+  DerEncoder,
+  parse,
+  stringify
 }

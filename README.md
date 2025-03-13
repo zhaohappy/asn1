@@ -10,7 +10,7 @@ asn1 是一个 asn1 语法编解码实现，支持 ber、der、per。
 
 ```typescript
 
-import { defined } from 'asn1'
+import { defined } from '@libmedia/asn1'
 
 const Syntax = defined.Sequence({
   a: defined.Boolean(),
@@ -19,8 +19,8 @@ const Syntax = defined.Sequence({
   d: defined.BMPString(),
   e: defined.BitString(),
   g: defined.Enumeration({
-    a: defined.EnumerationValue('a', 0),
-    b: defined.EnumerationValue('b', 1),
+    a: defined.EnumerationValue(0),
+    b: defined.EnumerationValue(1),
   }),
   h: defined.ObjectId(),
   f: defined.Choice({
@@ -58,11 +58,11 @@ const Syntax = defined.Sequence({
 
 ```typescript
 
-import { BerEncoder } from 'asn1'
+import { BerEncoder } from '@libmedia/asn1'
 
 const encoder = new BerEncoder()
 
-const data: Asn1Syntax2Value<typeof Syntax> = {
+const buffer = encoder.encode({
   a: true,
   b: 1,
   c: '123',
@@ -95,8 +95,7 @@ const data: Asn1Syntax2Value<typeof Syntax> = {
     c: '^_^'
   },
   q: null
-}
-const buffer = encoder.encode(data, Syntax)
+}, Syntax)
 
 ```
 
@@ -104,7 +103,7 @@ const buffer = encoder.encode(data, Syntax)
 
 ```typescript
 
-import { BerDecoder } from 'asn1'
+import { BerDecoder } from '@libmedia/asn1'
 
 const decoder = new BerDecoder()
 
@@ -112,10 +111,18 @@ const result = decoder.decode(buffer, Syntax)
 
 ```
 
+### CLI
+
+你可以使用命令行工具将 asn 语法定义文件快速转换成使用 defined 定义的 ts 文件。
+
+```shell
+# 全局安装
+asn1ts -i ./xxx.asn -o ./xxx.ts
+# 本地安装
+npx asn1ts -i ./xxx.asn -o ./xxx.ts
+```
+
 ### 开源协议
 
 [MIT](https://opensource.org/licenses/MIT)
 
-版权所有 (C) 2024-现在 赵高兴
-
-Copyright (C) 2024-present, Gaoxing Zhao

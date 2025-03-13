@@ -1,8 +1,7 @@
 {
-  "name": "asn1",
-  "version": "0.0.1",
+  "name": "@libmedia/asn1",
+  "version": "1.0.0",
   "description": "asn1 encoder and decoder",
-  "main": "index.js",
   "scripts": {
     "build": "rollup -c",
     "eslint-fix": "./node_modules/.bin/eslint './src/**/*.ts' -c=./eslint/typescript.js --rulesdir=./eslint/rules --ignore-path=./.eslintignore --fix",
@@ -12,12 +11,27 @@
     "type": "git",
     "url": "git+https://github.com/zhaohappy/asn1.git"
   },
+  "files": [
+    "dist/asn1.js",
+    "dist/asn1.js.map",
+    "dist/asn1.umd.js",
+    "dist/asn1.d.ts",
+    "cli"
+  ],
+  "bin": {
+    "asn1ts": "./cli/cli.js"
+  },
+  "main": "./dist/asn1.umd.js",
   "module": "./dist/asn1.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/asn1.d.ts",
   "keywords": [
     "asn",
+    "asn1",
     "decoder",
-    "encoder"
+    "encoder",
+    "ber",
+    "der",
+    "per"
   ],
   "author": "Gaoxing Zhao",
   "license": "MIT",
@@ -36,10 +50,14 @@
     "eslint": "^8.46.0",
     "jest": "^23.6.0",
     "rollup": "^4.27.4",
+    "rollup-plugin-dts": "^6.1.1",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "ts-jest": "^23.10.5",
     "tslib": "^2.8.1",
-    "typescript": "^5.7.2",
+    "typescript": "^5.8.2",
     "yargs": "^13.3.0"
+  },
+  "dependencies": {
+    "commander": "^13.1.0"
   }
 }
