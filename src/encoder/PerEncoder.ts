@@ -403,12 +403,6 @@ export default class PerEncoder {
     for (let i = 0; i < optionalMarker.length; i++) {
       this.writer.writeU1(+optionalMarker[i])
     }
-    if (syntax.extendable && extendMarker) {
-      this.writeSmallUnsigned(extendMarker.length - 1)
-      for (let i = 0; i < extendMarker.length; i++) {
-        this.writer.writeU1(+extendMarker[i])
-      }
-    }
 
     let keys = syntax.keys
     for (let i = 0; i < keys.length; i++) {
@@ -416,7 +410,12 @@ export default class PerEncoder {
         this.encodeInternal(sequence[keys[i]] ?? syntax.standardItems[keys[i]].defaultValue, syntax.standardItems[keys[i]] as Asn1SyntaxInteger)
       }
     }
+
     if (syntax.extendable && extendMarker) {
+      this.writeSmallUnsigned(extendMarker.length - 1)
+      for (let i = 0; i < extendMarker.length; i++) {
+        this.writer.writeU1(+extendMarker[i])
+      }
       let keys = syntax.extKeys
       for (let i = 0; i < keys.length; i++) {
         if (sequence[keys[i]] !== undefined || syntax.extItems[keys[i]].defaultValue) {

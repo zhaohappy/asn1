@@ -88,7 +88,7 @@ export default class PerDecoder {
   private readLength(lower: number, upper: number) {
     let length = 0
 
-    if (upper !== INT32_MAX && this.align) {
+    if (upper !== INT32_MAX && !this.align) {
       if (upper - lower > 0xffff) {
         throw new Error('not support')
       }
@@ -352,12 +352,6 @@ export default class PerDecoder {
     for (let i = 0; i < optionalCount; i++) {
       optionalMarker.push(this.reader.readU1())
     }
-    if (syntax.extendable && hasExtend) {
-      const len = this.readSmallUnsigned() + 1
-      for (let i = 0; i < len; i++) {
-        extendMarker.push(this.reader.readU1())
-      }
-    }
 
     let sequence: Data = {}
     let keys = syntax.keys
@@ -371,6 +365,10 @@ export default class PerDecoder {
       }
     }
     if (syntax.extendable && hasExtend) {
+      const len = this.readSmallUnsigned() + 1
+      for (let i = 0; i < len; i++) {
+        extendMarker.push(this.reader.readU1())
+      }
       let keys = syntax.extKeys
       const others: Uint8Array[] = []
       for (let i = 0; i < extendMarker.length; i++) {
@@ -403,9 +401,16 @@ export default class PerDecoder {
   private decodeAnyType(buffer: Uint8Array, syntax: Asn1Syntax) {
     const reader = this.reader
     this.reader = this.subReader
-    const v = this.decode(buffer, syntax)
-    this.reader = reader
-    return v
+    this.reader.resetBuffer(buffer)
+    try {
+      const v = this.decodeInternal(syntax)
+      this.reader = reader
+      return v
+    }
+    catch (error) {
+      this.reader = reader
+      throw error
+    }
   }
 
   private decodeUTF8String(syntax: Asn1SyntaxUTF8String) {
