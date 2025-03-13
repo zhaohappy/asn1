@@ -1,23 +1,23 @@
 ans1
 ======
-中文 | [English](README_en.md)
+English | [中文](README.md)
 
 ![](https://img.shields.io/badge/language-typescript-blue.svg) ![](https://img.shields.io/badge/platform-web%20|%20node-lightgrey.svg) ![license](https://img.shields.io/github/license/zhaohappy/asn1) [![npm](https://img.shields.io/npm/v/@libmedia/asn1.svg?style=flat)](https://www.npmjs.com/package/@libmedia/asn1)
 
-### 介绍
+### Introduction
 
-asn1 是一个 asn1 语法编解码实现，支持 ber、der、per。
+asn1 is an asn1 syntax codec implementation that supports ber, der, and per.
 
 
-### 使用
+### Start
 
-#### 安装
+#### install
 
 ```bash
 npm install @libmedia/asn1
 ```
 
-#### 定义 asn1 语法
+#### Defining asn1 syntax
 
 ```typescript
 
@@ -65,7 +65,7 @@ const Syntax = defined.Sequence({
 
 ```
 
-#### 编码
+#### Encode
 
 ```typescript
 
@@ -110,7 +110,7 @@ const buffer = encoder.encode({
 
 ```
 
-#### 解码
+#### Decode
 
 ```typescript
 
@@ -124,16 +124,16 @@ const result = decoder.decode(buffer, Syntax)
 
 ### CLI
 
-你可以使用命令行工具将 asn 语法定义文件快速转换成使用 defined 定义的 ts 文件。
+You can use command line tools to quickly convert asn syntax definition files into ts files.
 
 ```shell
-# 全局安装
+# global
 asn1ts -i ./xxx.asn -o ./xxx.ts
-# 本地安装
+# local
 npx asn1ts -i ./xxx.asn -o ./xxx.ts
 ```
 
-### 开源协议
+### License
 
 [MIT](https://opensource.org/licenses/MIT)
 
