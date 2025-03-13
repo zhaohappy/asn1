@@ -13,8 +13,8 @@ describe('sequence', () => {
       d: defined.BMPString(),
       e: defined.BitString(),
       g: defined.Enumeration({
-        a: defined.EnumerationValue('a', 0),
-        b: defined.EnumerationValue('b', 1),
+        a: defined.EnumerationValue(0),
+        b: defined.EnumerationValue(1),
       }),
       h: defined.ObjectId(),
       f: defined.Choice({
@@ -91,10 +91,10 @@ describe('sequence', () => {
   test('enumeration ext ext value', () => {
     const Syntax = defined.Sequence({
       a: defined.EnumerationExt({
-        a: defined.EnumerationValue('a', 0),
-        b: defined.EnumerationValue('b', 1)
+        a: defined.EnumerationValue(0),
+        b: defined.EnumerationValue(1)
       }, {
-        c: defined.EnumerationValue('c', 2)
+        c: defined.EnumerationValue(2)
       })
     })
 
@@ -112,10 +112,10 @@ describe('sequence', () => {
   test('enumeration ext standard', () => {
     const Syntax = defined.Sequence({
       a: defined.EnumerationExt({
-        a: defined.EnumerationValue('a', 0),
-        b: defined.EnumerationValue('b', 1)
+        a: defined.EnumerationValue(0),
+        b: defined.EnumerationValue(1)
       }, {
-        c: defined.EnumerationValue('c', 2)
+        c: defined.EnumerationValue(2)
       })
     })
 

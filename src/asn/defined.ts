@@ -12,6 +12,8 @@ export const ChoiceTag = Symbol('tag')
 export const ChoiceTagClass = Symbol('tagClass')
 export const SequenceExtendable = Symbol('extendable')
 
+const isProxy = Symbol('isProxy')
+
 let GeneralCharSet = ''
 for (let i = 0; i < 256; i++) {
   GeneralCharSet += String.fromCharCode(i)
@@ -118,7 +120,6 @@ export interface Asn1SyntaxChoice extends Asn1Syntax {
 
 export interface Asn1SyntaxEnumerationValue extends Asn1Syntax {
   type: typeof Asn1SyntaxType.EnumerationValue
-  name: string
   value: number
 }
 
@@ -391,12 +392,31 @@ export type Asn1Syntax2Value<T extends Asn1Syntax> =
                                                                 : never
 
 export function Optional<T extends Asn1Syntax>(syntax: T, value?: Asn1Syntax2Value<T>) {
-  syntax = deepClone(syntax)
-  syntax.optional = true
-  if (value !== undefined) {
-    syntax.defaultValue = value
-  }
-  return syntax as (Omit<T, 'optional'> & { optional: true })
+  let optional = true
+  return new Proxy({}, {
+    get: function (target, key, receiver) {
+      if (key === 'optional') {
+        return optional
+      }
+      else if (key === 'defaultValue' && value !== undefined) {
+        return value
+      }
+      else if (key === isProxy) {
+        return true
+      }
+      return syntax[key]
+    },
+    set: function (target, key, v) {
+      if (key === 'optional') {
+        optional = v
+      }
+      else if (key === 'defaultValue') {
+        value = v
+      }
+      syntax[key] = v
+      return true
+    }
+  }) as (Omit<T, 'optional'> & { optional: true })
 }
 
 export function Tag<T extends Asn1Syntax>(
@@ -405,13 +425,42 @@ export function Tag<T extends Asn1Syntax>(
   tagType: TagType = TagType.Implicitly,
   tagClass: TagClass = TagClass.ContextSpecific
 ) {
-  syntax = deepClone(syntax)
-  syntax.asn1Tag = syntax.tag
-  syntax.tag = tag
-  syntax.tagClass = tagClass
-  syntax.tagType = tagType
-
-  return syntax
+  return new Proxy({}, {
+    get: function (target, key, receiver) {
+      if (key === 'tag') {
+        return tag
+      }
+      else if (key === 'tagClass') {
+        return tagClass
+      }
+      else if (key === 'tagType') {
+        return tagType
+      }
+      else if (key === 'asn1Tag') {
+        return syntax.tag
+      }
+      else if (key === isProxy) {
+        return true
+      }
+      return syntax[key]
+    },
+    set: function (target, key, value) {
+      if (key === 'tag') {
+        tag = value
+      }
+      else if (key === 'tagClass') {
+        tagClass = tagClass
+      }
+      else if (key === 'tagType') {
+        tagType = tagType
+      }
+      else if (key === 'asn1Tag') {
+        syntax.tag = value
+      }
+      syntax[key] = value
+      return true
+    }
+  }) as T
 }
 
 export function Constraint<T extends Asn1SyntaxConstrained>(syntax: T, constraint: ConstraintType, lowerLimit: number, upperLimit: number) {
@@ -430,20 +479,51 @@ export function Constraint<T extends Asn1SyntaxConstrained>(syntax: T, constrain
     )) {
     throw new Error('invalid constraint')
   }
-  syntax = deepClone(syntax)
-
-  syntax.constraint = constraint
-  syntax.lowerLimit = lowerLimit
-  syntax.upperLimit = upperLimit
-  if (constraint === ConstraintType.Extendable) {
-    syntax.extendable = true
-  }
-  return syntax
+  let extendable: boolean
+  return new Proxy({}, {
+    get: function (target, key, receiver) {
+      if (key === 'constraint') {
+        return constraint
+      }
+      else if (key === 'lowerLimit') {
+        return lowerLimit
+      }
+      else if (key === 'upperLimit') {
+        return upperLimit
+      }
+      else if (key === 'extendable') {
+        if (extendable != null) {
+          return extendable
+        }
+        if (constraint === ConstraintType.Extendable) {
+          return true
+        }
+      }
+      else if (key === isProxy) {
+        return true
+      }
+      return syntax[key]
+    },
+    set: function (target, key, value) {
+      if (key === 'constraint') {
+        constraint = value
+      }
+      else if (key === 'lowerLimit') {
+        lowerLimit = value
+      }
+      else if (key === 'upperLimit') {
+        upperLimit = value
+      }
+      else if (key === 'extendable') {
+        extendable = value
+      }
+      syntax[key] = value
+      return true
+    }
+  }) as T
 }
 
 function setCharSetBits<T extends Asn1SyntaxConstrainedString>(syntax: T) {
-  syntax = deepClone(syntax)
-
   if (!syntax.charSet) {
     syntax.charSet = syntax.canonicalSet
   }
@@ -459,7 +539,7 @@ function setCharSetBits<T extends Asn1SyntaxConstrainedString>(syntax: T) {
 }
 
 export function CharSet<T extends Asn1SyntaxConstrainedString>(syntax: T, charSet: string, type: ConstraintType) {
-  syntax = deepClone(syntax)
+  syntax = syntax[isProxy] ? syntax : deepClone(syntax)
   if (type === ConstraintType.Unconstrained) {
     syntax.charSet = syntax.canonicalSet
   }
@@ -485,12 +565,7 @@ export function Sequence<T extends Record<string, Asn1Syntax>>(standard: T, keys
   if (!keys) {
     keys = Object.keys(standard)
   }
-  let optionalCount = 0
-  for (let i = 0; i < keys.length; i++) {
-    if (standard[keys[i]].optional) {
-      optionalCount++
-    }
-  }
+  let optionalCount: number
   return {
     type: Asn1SyntaxType.Sequence,
     tagClass: TagClass.Universal,
@@ -502,7 +577,17 @@ export function Sequence<T extends Record<string, Asn1Syntax>>(standard: T, keys
     defaultValue: undefined,
     standardItems: standard,
     extItems: {} as Record<string, Asn1Syntax>,
-    optionalCount
+    get optionalCount() {
+      if (optionalCount == null) {
+        optionalCount = 0
+        for (let i = 0; i < keys.length; i++) {
+          if (standard[keys[i]].optional) {
+            optionalCount++
+          }
+        }
+      }
+      return optionalCount
+    }
   } as const
 }
 
@@ -510,12 +595,7 @@ export function SequenceExt<T extends Record<string, Asn1Syntax>, U extends Reco
   if (!keys) {
     keys = Object.keys(standard)
   }
-  let optionalCount = 0
-  for (let i = 0; i < keys.length; i++) {
-    if (standard[keys[i]].optional) {
-      optionalCount++
-    }
-  }
+  let optionalCount: number
   return {
     type: Asn1SyntaxType.Sequence,
     tagClass: TagClass.Universal,
@@ -527,11 +607,21 @@ export function SequenceExt<T extends Record<string, Asn1Syntax>, U extends Reco
     defaultValue: undefined,
     standardItems: standard,
     extItems: ext,
-    optionalCount
+    get optionalCount() {
+      if (optionalCount == null) {
+        optionalCount = 0
+        for (let i = 0; i < keys.length; i++) {
+          if (standard[keys[i]].optional) {
+            optionalCount++
+          }
+        }
+      }
+      return optionalCount
+    }
   } as const
 }
 
-export function SequenceOf<T extends Asn1Syntax>(syntax: T) {
+export function SequenceOf<T extends Asn1Syntax>(syntax: T | (() => T)) {
   let lowerLimit = 0
   let upperLimit = UINT32_MAX
   return {
@@ -544,7 +634,9 @@ export function SequenceOf<T extends Asn1Syntax>(syntax: T) {
     defaultValue: undefined,
     lowerLimit,
     upperLimit,
-    syntax
+    get syntax() {
+      return typeof syntax === 'function' ? syntax() : syntax
+    }
   } as const
 }
 
@@ -578,7 +670,7 @@ export function SetExt<T extends Record<string, Asn1Syntax>, U extends Record<st
   } as const
 }
 
-export function SetOf<T extends Asn1Syntax>(syntax: T) {
+export function SetOf<T extends Asn1Syntax>(syntax: T | (() => T)) {
   let lowerLimit = 0
   let upperLimit = UINT32_MAX
   return {
@@ -591,7 +683,9 @@ export function SetOf<T extends Asn1Syntax>(syntax: T) {
     defaultValue: undefined,
     lowerLimit,
     upperLimit,
-    syntax
+    get syntax() {
+      return typeof syntax === 'function' ? syntax() : syntax
+    }
   } as const
 }
 
@@ -625,15 +719,14 @@ export function ChoiceExt<T extends Record<string, Asn1Syntax>, U extends Record
   } as const
 }
 
-export function EnumerationValue<T extends string>(name: T, value: number) {
+export function EnumerationValue(value: number) {
   return {
     type: Asn1SyntaxType.EnumerationValue,
     tagClass: TagClass.Universal,
     optional: false,
     defaultValue: undefined,
     extendable: false,
-    value,
-    name
+    value
   } as const
 }
 
@@ -1096,7 +1189,7 @@ export function BitString() {
   } as const
 }
 
-export function BitStringWithIndex<T extends Asn1SyntaxBitStringIndex[]>(indexes: T, ) {
+export function BitStringWithIndex<T extends Asn1SyntaxBitStringIndex[]>(indexes: T) {
   let lowerLimit = 0
   let upperLimit = UINT32_MAX
   return {
@@ -1154,4 +1247,72 @@ export function Any() {
     extendable: false,
     defaultValue: undefined
   } as const
+}
+
+export function TypeIdentifier<T extends Asn1Syntax>(syntax: T) {
+  return Sequence({
+    id: ObjectId(),
+    type: syntax
+  })
+}
+
+type Present<T extends Record<string, Asn1Syntax>, P extends string> = {
+  [K in keyof T]: K extends P ? (Omit<T[K], 'optional'> & { optional: false }) : T[K]
+}
+type Absent<T extends Record<string, Asn1Syntax>, A extends string> = Omit<T, A>
+
+function Present<T extends Asn1Syntax>(syntax: T) {
+  let optional = false
+  return new Proxy({}, {
+    get: function (target, key, receiver) {
+      if (key === 'optional') {
+        return optional
+      }
+      else if (key === isProxy) {
+        return true
+      }
+      return syntax[key]
+    },
+    set: function (target, key, v) {
+      if (key === 'optional') {
+        optional = v
+      }
+      syntax[key] = v
+      return true
+    }
+  }) as (Omit<T, 'optional'> & { optional: false })
+}
+
+function Absent(syntax: Record<string, Asn1Syntax>, absent: string[]) {
+  return new Proxy({}, {
+    get: function (target, key, receiver) {
+      if (key === isProxy) {
+        return true
+      }
+      else if (absent.indexOf(key as string) > -1) {
+        return undefined
+      }
+      return syntax[key as string]
+    },
+    set: function (target, key, v) {
+      syntax[key as string] = v
+      return true
+    }
+  })
+}
+
+export function WithComponents<T extends Asn1SyntaxSequence | Asn1SyntaxChoice, P extends string, A extends string>(syntax: T, present: P[], absent: A[]) {
+  for (let i = 0; i < present.length; i++) {
+    if (syntax.standardItems[present[i]]) {
+      syntax.standardItems[present[i]] = Present(syntax.standardItems[present[i]])
+    }
+    if (syntax.extItems[present[i]]) {
+      syntax.extItems[present[i]] = Present(syntax.extItems[present[i]])
+    }
+  }
+  if (absent.length) {
+    syntax.standardItems = Absent(syntax.standardItems, absent)
+    syntax.extItems = Absent(syntax.extItems, absent)
+  }
+  return syntax as unknown as (Omit<T, 'standardItems' | 'extItems'> & { standardItems: Present<Absent<T['standardItems'], A>, P>} & { extItems: Present<Absent<T['extItems'], A>, P>})
 }
