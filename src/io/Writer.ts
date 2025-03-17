@@ -178,4 +178,28 @@ export default class BitWriter {
   public getSize() {
     return this.size
   }
+
+  public getPointer() {
+    return this.pointer
+  }
+
+  public setPointer(p: number) {
+    return this.pointer = 0
+  }
+
+  public getBitPointer() {
+    return this.bitPointer
+  }
+
+  public setBitPointer(p: number) {
+    return this.bitPointer = p
+  }
+
+  public getFirst() {
+    return this.buffer[0]
+  }
+
+  public setFirst(v: number) {
+    this.buffer[0] = v
+  }
 }

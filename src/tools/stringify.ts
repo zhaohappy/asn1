@@ -318,7 +318,7 @@ function formatNode(node: Asn1Node, options: StringifyOptions, depth: number = 0
     result = `defined.Tag(${result}, ${node.tag}${args})`
   }
   if (node.charSet) {
-    result = `defined.CharSet(${result}, \`${node.charSet}\`, defined.ConstraintType.Unconstrained)`
+    result = `defined.CharSet(${result}, \`${node.charSet}\`, defined.ConstraintType.Partially)`
   }
   if (node.optional) {
     result = `defined.Optional(${result}${node.default !== undefined ? `, ${node.default}` : ''})`

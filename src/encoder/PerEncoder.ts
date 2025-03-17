@@ -35,11 +35,11 @@ export default class PerEncoder {
     this.textEncoder = new TextEncoder()
 
     this.writer.onFlush = (data) => {
-      this.buffers.push(data)
+      this.buffers.push(data.slice())
       return 0
     }
     this.subWriter.onFlush = (data) => {
-      this.subBuffers.push(data)
+      this.subBuffers.push(data.slice())
       return 0
     }
   }
@@ -336,7 +336,7 @@ export default class PerEncoder {
         this.writeN(value.charCodeAt(i), nBits)
       }
       else {
-        let pos = syntax.canonicalSet.indexOf(value[i])
+        let pos = syntax.charSet.indexOf(value[i])
         if (pos < 0) {
           pos = 0
         }
@@ -373,7 +373,7 @@ export default class PerEncoder {
 
   private encodeChoice(choice: Data, syntax: Asn1SyntaxChoice) {
     const { index, value, choiceSyntax } = getChoice(choice, syntax)
-    if (!value || index < 0 || !choiceSyntax) {
+    if (value === undefined || index < 0 || !choiceSyntax) {
       throw new Error('invalid choice')
     }
 
@@ -433,16 +433,26 @@ export default class PerEncoder {
   }
 
   private encodeAnyType(value: any, syntax: Asn1Syntax) {
-    this.subBuffers.length = 0
-    this.subWriter.reset()
+    this.subWriter.flush()
+    const bitPointer = this.subWriter.getBitPointer()
+    const first = this.subWriter.getFirst()
+    const oldCache = this.subBuffers
+    this.subBuffers = []
+
     let buffer: Uint8Array<ArrayBufferLike> = new Uint8Array([0])
     if (value != null) {
       const writer = this.writer
       this.writer = this.subWriter
       this.encodeInternal(value, syntax as Asn1SyntaxInteger)
+      this.writer.padding()
       this.writer.flush()
       buffer = concatTypeArray(Uint8Array, this.subBuffers)
       this.writer = writer
+      this.subBuffers = oldCache
+      if (bitPointer !== 0) {
+        this.subWriter.setFirst(first)
+        this.subWriter.setBitPointer(bitPointer)
+      }
     }
     this.writeLength(buffer.length, 0, INT32_MAX)
     this.writer.writeBuffer(buffer)
@@ -526,6 +536,7 @@ export default class PerEncoder {
 
   public encode<T extends Asn1Syntax>(data: Asn1Syntax2Value<T>, syntax: T): Uint8Array {
     this.buffers.length = 0
+    this.writer.reset()
     this.encodeInternal(data, syntax)
     this.writer.padding()
     this.writer.flush()

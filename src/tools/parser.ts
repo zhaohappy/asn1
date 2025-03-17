@@ -102,6 +102,9 @@ class Parser {
               throw new Error('invalid syntax')
             }
           }
+          else if (!identifier) {
+            this.pos++
+          }
           break
       }
     }
@@ -302,6 +305,18 @@ class Parser {
   }
 
   private parseConstraint(node: Asn1Node, constraint: string) {
+
+    function parseInteger(value: string) {
+      value = value.toLowerCase()
+      if (value === 'min') {
+        return -Infinity
+      }
+      else if (value === 'max') {
+        return Infinity
+      }
+      return +value
+    }
+
     const match = constraint.match(/\((.*?)\)/)
     if (match) {
       node.constraint = {
@@ -311,18 +326,18 @@ class Parser {
       }
       const items = match[1].split(',')
       items.forEach((item) => {
-        if (item.trim() === '..') {
+        if (item.trim() === '...') {
           node.constraint.extendable = true
         }
         else {
           const list = item.trim().split('..')
           if (list.length === 2) {
-            node.constraint.min = +list[0]
-            node.constraint.max = +list[1]
+            node.constraint.min = parseInteger(list[0])
+            node.constraint.max = parseInteger(list[1])
           }
           else {
-            node.constraint.min = +list[0]
-            node.constraint.max = +list[0]
+            node.constraint.min = parseInteger(list[0])
+            node.constraint.max = parseInteger(list[0])
           }
         }
       })

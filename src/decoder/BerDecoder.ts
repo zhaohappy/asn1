@@ -408,7 +408,7 @@ export default class BerDecoder {
       }
       let key = this.getKeyByTag(tag, tagClass, syntax)
       if (!key) {
-        throw new Error(`cannot found key og tag ${tag}`)
+        throw new Error(`cannot found key of tag ${tag}`)
       }
       const keySyntax = syntax.standardItems[key] || syntax.extItems[key]
       if (keySyntax.tagType !== TagType.Explicitly) {

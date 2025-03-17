@@ -21,14 +21,12 @@ const MIN_SAFE_INTEGER = BigInt(Number.MIN_SAFE_INTEGER)
 export default class PerDecoder {
 
   private reader: Reader
-  private subReader: Reader
 
   private align: boolean
   private textDecoderMap: Map<string, TextDecoder>
 
   constructor(align: boolean = true) {
     this.reader = new Reader()
-    this.subReader = new Reader()
     this.align = align
     this.textDecoderMap = new Map()
   }
@@ -275,7 +273,7 @@ export default class PerDecoder {
         v += String.fromCharCode(this.readN(nBits))
       }
       else {
-        v += syntax.canonicalSet[this.readN(nBits)]
+        v += syntax.charSet[this.readN(nBits)]
       }
     }
     return v
@@ -400,7 +398,7 @@ export default class PerDecoder {
 
   private decodeAnyType(buffer: Uint8Array, syntax: Asn1Syntax) {
     const reader = this.reader
-    this.reader = this.subReader
+    this.reader = new Reader(buffer.length)
     this.reader.resetBuffer(buffer)
     try {
       const v = this.decodeInternal(syntax)
