@@ -22,7 +22,7 @@ export default class BitReader {
    * @param data 待读取的字节
    * @param bigEndian 是否按大端字节序读取，默认大端字节序（网络字节序）
    */
-  constructor(size: number = 1 * 1024 * 1024) {
+  constructor(size: number = 1 * 1024 * 1024, buffer?: Uint8Array) {
     this.pointer = 0
     this.bitsLeft = 8
     this.pos = 0
@@ -30,7 +30,14 @@ export default class BitReader {
     this.size = size
     this.endPointer = 0
 
-    this.buffer = new Uint8Array(this.size)
+    if (buffer) {
+      this.buffer = buffer
+      this.size = buffer.length
+      this.endPointer = this.size
+    }
+    else {
+      this.buffer = new Uint8Array(this.size)
+    }
   }
 
   /**

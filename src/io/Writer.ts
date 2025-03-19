@@ -191,6 +191,14 @@ export default class BitWriter {
     return this.bitPointer
   }
 
+  public getPos() {
+    return this.pos
+  }
+
+  public setPos(pos: number) {
+    this.pos = pos
+  }
+
   public setBitPointer(p: number) {
     return this.bitPointer = p
   }

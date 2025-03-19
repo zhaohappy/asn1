@@ -433,15 +433,18 @@ export default class PerEncoder {
   }
 
   private encodeAnyType(value: any, syntax: Asn1Syntax) {
-    this.subWriter.flush()
-    const bitPointer = this.subWriter.getBitPointer()
-    const first = this.subWriter.getFirst()
-    const oldCache = this.subBuffers
-    this.subBuffers = []
-
     let buffer: Uint8Array<ArrayBufferLike> = new Uint8Array([0])
     if (value != null) {
+      this.subWriter.flush()
+      const bitPointer = this.subWriter.getBitPointer()
+      const pos = this.subWriter.getPos()
+      const pointer = this.subWriter.getPointer()
+      const first = this.subWriter.getFirst()
+      const oldCache = this.subBuffers
+      this.subBuffers = []
+
       const writer = this.writer
+      this.subWriter.reset()
       this.writer = this.subWriter
       this.encodeInternal(value, syntax as Asn1SyntaxInteger)
       this.writer.padding()
@@ -449,10 +452,10 @@ export default class PerEncoder {
       buffer = concatTypeArray(Uint8Array, this.subBuffers)
       this.writer = writer
       this.subBuffers = oldCache
-      if (bitPointer !== 0) {
-        this.subWriter.setFirst(first)
-        this.subWriter.setBitPointer(bitPointer)
-      }
+      this.subWriter.setFirst(first)
+      this.subWriter.setBitPointer(bitPointer)
+      this.subWriter.setPointer(pointer)
+      this.subWriter.setPos(pos)
     }
     this.writeLength(buffer.length, 0, INT32_MAX)
     this.writer.writeBuffer(buffer)

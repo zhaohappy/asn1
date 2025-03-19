@@ -398,8 +398,7 @@ export default class PerDecoder {
 
   private decodeAnyType(buffer: Uint8Array, syntax: Asn1Syntax) {
     const reader = this.reader
-    this.reader = new Reader(buffer.length)
-    this.reader.resetBuffer(buffer)
+    this.reader = new Reader(buffer.length, buffer)
     try {
       const v = this.decodeInternal(syntax)
       this.reader = reader
