@@ -1,6 +1,6 @@
 {
   "name": "@libmedia/asn1",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "asn1 encoder and decoder",
   "scripts": {
     "build": "rollup -c",
